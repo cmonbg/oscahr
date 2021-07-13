@@ -1,0 +1,2 @@
+packaging>=20.0
+stem>=1.8.0
