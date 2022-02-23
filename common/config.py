@@ -274,8 +274,9 @@ class OscahrConfig:
 
         if self._pid_file.exists():
             self._pid_existed = True
-            raise RuntimeError(
-                f"OSCAHR is already running with process ID {self._pid_file.read_text().strip()}!")
+            print("PID file found, check if OSCAHR is not already running!")
+            # raise RuntimeError(
+            #     f"OSCAHR is already running with process ID {self._pid_file.read_text().strip()}!")
         else:
             self._pid_existed = False
             self._pid_file.write_text(str(os.getpid()))
