@@ -275,6 +275,8 @@ class OscahrConfig:
         if self._pid_file.exists():
             self._pid_existed = True
             print("PID file found, check if OSCAHR is not already running!")
+            # if OSCAHR is not terminated with its exit method, the PID file will not be automatically deleted and
+            # OSCAHR will fail to start again until the PID file is deleted somehow
             # raise RuntimeError(
             #     f"OSCAHR is already running with process ID {self._pid_file.read_text().strip()}!")
         else:
@@ -290,6 +292,7 @@ class OscahrConfig:
         """
 
         self._tor_path = shutil.which("tor")
+        print("checking tor")
         if self._tor_path is not None:
             logging.debug(f"Found Tor binary at '{self._tor_path}'")
         else:
