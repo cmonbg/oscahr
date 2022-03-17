@@ -89,8 +89,8 @@ class SmartHomeDevice:
             # both local client connection and connection from Onion Service to localhost.
             # SO_REUSEADDR flag is automatically set to enable a start of the server a short time
             # period after an previous session (socket is in TIME_WAIT state).
-            with socket.create_server(("", constant.COM_PORT), family=socket.AF_INET6,
-                                      dualstack_ipv6=True) as s:
+            with socket.create_server(("", constant.COM_PORT), family=socket.AF_INET,
+                                      dualstack_ipv6=False) as s:
                 self._log.info("Server socket bound to all local interfaces on port "
                                f"{s.getsockname()[1]}, socket is listening...")
 
