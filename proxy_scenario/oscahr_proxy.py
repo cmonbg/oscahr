@@ -14,6 +14,13 @@ License: MIT
 import argparse
 import logging
 import sys
+import traceback
+import os
+
+# define library locations
+script_dir = os.path.dirname(__file__)
+project_root = os.path.join(script_dir, '..')
+sys.path.append(project_root)
 
 # Local application imports
 from common.config import OscahrConfig
@@ -48,7 +55,7 @@ def main():
     except KeyboardInterrupt:
         _log.debug("Interrupted by user!")
     except Exception as error:
-        _log.error(f"A {type(error).__name__} occured: {error}")
+        _log.error(f"A {type(error).__name__} occured: {error} in {traceback.print_exc()}")
     finally:
         oscahr_config.cleanup()
         return 0

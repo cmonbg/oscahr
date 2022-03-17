@@ -292,7 +292,7 @@ class OscahrConfig:
         """
 
         self._tor_path = shutil.which("tor")
-        print("checking tor")
+
         if self._tor_path is not None:
             logging.debug(f"Found Tor binary at '{self._tor_path}'")
         else:
