@@ -127,6 +127,9 @@ def check_tor_version():
         RuntimeError: The installed Tor version is too old.
     """
 
+    # don't check version for now, since 'tor --version' does not produce any output on the router
+    return
+
     import stem.version as stem_version
 
     TOR_MIN = "0.3.5.7"
