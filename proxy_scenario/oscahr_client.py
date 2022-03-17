@@ -32,7 +32,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        oscahr_config = OscahrConfig(verbose=args.verbose, client=True)
+        oscahr_config = OscahrConfig("proxy_client", verbose=args.verbose, client=True)
         
         Client(oscahr_config).start_client()
 

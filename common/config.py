@@ -42,7 +42,7 @@ class OscahrConfig:
     # Class constants
     _START_TOR_RETRIES = 3
 
-    def __init__(self, verbose=False, client=False, silent=False):
+    def __init__(self, oscahr_type, verbose=False, client=False, silent=False):
         """Initializes the Common object with mandatory variables.
 
         Args:
@@ -57,7 +57,7 @@ class OscahrConfig:
         # Register the termination signal to be caught by the signal handler
         signal.signal(signal.SIGTERM, self.signal_handler)
 
-        self.oscahr_config_dir = self._create_oscahr_config_dir()
+        self.oscahr_config_dir = self._create_oscahr_config_dir(oscahr_type)
         self._log = self._init_logger(verbose, client, silent)
 
         self._log.debug("Initializing Common object...")
@@ -198,14 +198,14 @@ class OscahrConfig:
 
         self._log.debug("*" * 60)  # Add dividing line to log
 
-    def _create_oscahr_config_dir(self):
+    def _create_oscahr_config_dir(self, oscahr_type):
         """Creates config-dir in USERHOME/.config/oscahr if it doesn't exists.
 
         Returns:
             A pathlib object containing the path to the OSCAHR config directory.
         """
 
-        oscahr_config_dir = pathlib.Path.home() / ".config" / "oscahr"
+        oscahr_config_dir = pathlib.Path.home() / ".config" / "oscahr" / oscahr_type
         oscahr_config_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         return oscahr_config_dir
 

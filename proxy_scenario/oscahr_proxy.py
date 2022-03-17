@@ -45,7 +45,7 @@ def main():
 
     try:
         # When started in management mode, enable client log mode (simply pass args value)
-        oscahr_config = OscahrConfig(verbose=args.verbose, client=args.manage, silent=args.silent)
+        oscahr_config = OscahrConfig("proxy", verbose=args.verbose, client=args.manage, silent=args.silent)
 
         if args.manage:
             Proxy(oscahr_config).manage_devices()

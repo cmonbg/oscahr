@@ -33,7 +33,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        oscahr_config = OscahrConfig(verbose=args.verbose, client=True)
+        oscahr_config = OscahrConfig("embedded_client", verbose=args.verbose, client=True)
 
         with Client(oscahr_config) as client:
             client.start_client()

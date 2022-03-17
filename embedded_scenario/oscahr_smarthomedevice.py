@@ -37,7 +37,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        oscahr_config = OscahrConfig(verbose=args.verbose, silent=args.silent)
+        oscahr_config = OscahrConfig("embedded_device", verbose=args.verbose, silent=args.silent)
 
         with SmartHomeDevice(oscahr_config) as shd:
             shd.start_server()
