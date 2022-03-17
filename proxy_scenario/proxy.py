@@ -14,6 +14,13 @@ import ipaddress
 import json
 import logging
 import shutil
+import sys
+import os
+
+# define library locations
+script_dir = os.path.dirname(__file__)
+project_root = os.path.join(script_dir, '..')
+sys.path.append(project_root)
 
 # Third party imports
 import questionary

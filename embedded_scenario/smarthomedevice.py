@@ -18,6 +18,13 @@ import selectors
 import socket
 import time
 import types
+import os
+import sys
+
+# define library locations
+script_dir = os.path.dirname(__file__)
+project_root = os.path.join(script_dir, '..')
+sys.path.append(project_root)
 
 # Local application imports
 import common.constant as constant
