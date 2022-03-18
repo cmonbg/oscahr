@@ -124,11 +124,13 @@ class SmartHomeDevice:
         conn, addr = sock.accept()
         conn.setblocking(False)
 
+        # Somehow leads to an error when a normal IPv4 address is given, no idea what is going on, maybe new version
         # If the IP address is a IPv4 mapped IPv6 address unmap it to get a valid IPv4 address
-        if ipaddress.IPv6Address(addr[0]).ipv4_mapped is not None:
-            ip_address = ipaddress.IPv6Address(addr[0]).ipv4_mapped
-        else:
-            ip_address = addr[0]
+        # if ipaddress.IPv6Address(addr[0]).ipv4_mapped is not None:
+        #     ip_address = ipaddress.IPv6Address(addr[0]).ipv4_mapped
+        # else:
+        #     ip_address = addr[0]
+        ip_address = addr[0]
 
         self._log.info(f"{validation.validate_print_ip_address(ip_address)}:{addr[1]} connected "
                        "to the server")
