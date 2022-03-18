@@ -20,7 +20,8 @@ LOCAL_COMMANDS = [
     "activate_remote_access",
     "deactivate_remote_access",
     "delete_onion_service",
-    "exit"
+    "exit",
+    "show_webinterface"
 ]
 LOCAL_COMMANDS_TEXT = [
     "Get temperature",

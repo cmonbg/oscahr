@@ -20,6 +20,7 @@ import time
 import types
 import os
 import sys
+import traceback
 
 # define library locations
 script_dir = os.path.dirname(__file__)
@@ -110,7 +111,7 @@ class SmartHomeDevice:
                         else:  # Established connection -> handle event
                             self._handle_connection_event(key, mask)
         except Exception as error:
-            self._log.error(f"Error while starting the server: {error}")
+            self._log.error(f"Error while starting the server: {error} in {traceback.print_exc()}")
 
     def _accept_connection(self, sock):
         """Accepts an connection from a given socket and registers it at the selector
@@ -186,6 +187,11 @@ class SmartHomeDevice:
             # Time
             elif command == constant.LOCAL_COMMANDS[1]:
                 data.send_buffer = time.strftime("%H:%M:%S", time.localtime())
+
+            # Webinterface
+            elif command == constant.LOCAL_COMMANDS[6]:
+                # TODO: activate webinterface here
+                pass
 
             # Exit
             elif command == constant.LOCAL_COMMANDS[5]:
