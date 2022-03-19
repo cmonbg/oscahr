@@ -10,6 +10,7 @@ License: MIT
 """
 
 COM_PORT = 42021  # Static OSCAHR communication port
+ROUTER_PORT = 80
 ERROR_RESPONSE = "ERROR"
 SUCCESS_RESPONSE = "SUCCESS"
 DELIMITER_PARAM = ":"
@@ -23,8 +24,8 @@ LOCAL_COMMANDS = [
     "exit",
 ]
 LOCAL_COMMANDS_TEXT = [
-    "Get temperature",
-    "Get current time",
+    "DEACTIVATED Get temperature",
+    "DEACTIVATED Get current time",
     "Activate remote access",
     "Deactivate remote access",
     "Delete Tor Onion Service",

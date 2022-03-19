@@ -79,7 +79,7 @@ class SmartHomeDevice:
         # Start Tor Onion Service if one exists, if not ignore errors
         try:
             self._onion_service_address = tor.start_disk_v3_onion_service(
-                self._onion_service_dir, self._config.tor_control_port, constant.COM_PORT)
+                self._onion_service_dir, self._config.tor_control_port, constant.ROUTER_PORT)
         except Exception as error:
             self._log.debug(error)
 
@@ -211,11 +211,11 @@ class SmartHomeDevice:
                                                                client_pub_key=parameter)
                             tor.reload_disk_v3_onion_service(self._onion_service_dir,
                                                              self._config.tor_control_port,
-                                                             constant.COM_PORT)
+                                                             constant.ROUTER_PORT)
                         else:
                             self._onion_service_address = tor.create_disk_v3_onion_service(
                                 self._onion_service_dir, self._config.tor_control_port,
-                                client_pub_key=parameter, port=constant.COM_PORT)
+                                client_pub_key=parameter, port=constant.ROUTER_PORT)
 
                         data.send_buffer = self._onion_service_address
                     except Exception as error:
@@ -227,7 +227,7 @@ class SmartHomeDevice:
                     try:
                         tor.remove_disk_v3_onion_service_auth(
                             self._onion_service_dir, parameter, self._config.tor_control_port,
-                            constant.COM_PORT)
+                            constant.ROUTER_PORT)
 
                         data.send_buffer = constant.SUCCESS_RESPONSE
                     except Exception as error:

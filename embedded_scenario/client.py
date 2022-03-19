@@ -553,6 +553,10 @@ class Client:
             self._registered_devices[device_name]["public_key"] = public_key
             self._registered_devices[device_name]["private_key"] = private_key
             tor.set_registered_devices(self._registered_devices, self._registered_devices_file)
+
+            # add auth to tor browser dir
+            self._add_onion_service_auth(device_name, onion_address, private_key)
+
             self._log.info(f"Successfully activated remote access for device '{device_name}'")
         except Exception as error:
             self._log.error(f"Error while activating remote access for device '{device_name}': "
