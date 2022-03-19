@@ -14,6 +14,7 @@ License: MIT
 import argparse
 import logging
 import sys
+import traceback
 
 # Local application imports
 from client import Client
@@ -41,7 +42,7 @@ def main():
     except KeyboardInterrupt:
         _log.debug("Interrupted by user!")
     except Exception as error:
-        _log.error(f"A {type(error).__name__} occured: {error}")
+        _log.error(f"A {type(error).__name__} occured: {error} in {traceback.print_exc()}")
     finally:
         oscahr_config.cleanup()
         return 0

@@ -12,9 +12,16 @@ License: MIT
 # Standard library imports
 import json
 import logging
+import os
+import pathlib
+import platform
+import shutil
 import socket
 
 # Third party imports
+import subprocess
+
+import psutil
 import questionary
 import socks  # PySocks
 
@@ -39,11 +46,13 @@ class Client:
     _CHOICES_REGISTERED_DEVICE = [
         "Connect locally",
         "Connect remotely",
+        "Open Device IP in Tor Browser",
+        "View Onion address",
         "View local IP address",
         "Change local IP address",
         "Rename device",
         "Delete device",
-        _BACK_TO_MAIN_STRING
+        _BACK_TO_MAIN_STRING,
     ]
 
     def __init__(self, oscahr_config):
@@ -63,6 +72,10 @@ class Client:
         self._onion_service_auth_dir = self._config.tor_data_dir / "onion_auth"
         self._onion_service_auth_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         self._registered_devices_file = self._config.oscahr_config_dir / "smarthomedevices.json"
+
+        (self._torbrowser_base_dir,
+         self._torbrowser_startup,
+         self._torbrowser_auth_dir) = self._get_torbrowser_paths()
 
         self._registered_devices = self._get_registered_devices()
         self._added_client_auths = False
@@ -175,22 +188,44 @@ class Client:
 
             # Connect remotely
             elif answer_operation == self._CHOICES_REGISTERED_DEVICE[1]:
+                self._log.info("Functionality not used at the moment")
+                continue
+                # if remote_access:
+                #     self._log.info("Starting client in remote mode...")
+                #     self._client_remote(device_name)
+                # else:
+                #     self._log.warning(f"Remote access isn't activated for device '{device_name}' "
+                #                       "yet. First activate it via local connection!")
+                #     continue
+
+            # Open Tor browser
+            if answer_operation == self._CHOICES_REGISTERED_DEVICE[2]:
                 if remote_access:
-                    self._log.info("Starting client in remote mode...")
-                    self._client_remote(device_name)
+                    # TODO: prompt from user
+                    port = 80
+                    http = "http"
+                    self._start_torbrowser(self._registered_devices[device_name]["onion_address"], port, http)
                 else:
-                    self._log.warning(f"Remote access isn't activated for device '{device_name}' "
-                                      "yet. First activate it via local connection!")
-                    continue
+                    self._log.info("Onion Access has not yet been set up. Connect to device and activate the "
+                                   "remote access first!")
+
+            # Show Onion Address
+            if answer_operation == self._CHOICES_REGISTERED_DEVICE[3]:
+                if remote_access:
+                    self._log.info(f"Onion Address of current device is "
+                                   f"'{self._registered_devices[device_name]['onion_address']}'")
+                else:
+                    self._log.info("Onion Access has not yet been set up. Connect to device and activate the "
+                                   "remote access first!")
 
             # View IP
-            elif answer_operation == self._CHOICES_REGISTERED_DEVICE[2]:
+            elif answer_operation == self._CHOICES_REGISTERED_DEVICE[4]:
                 ip_address = self._registered_devices[device_name]['ip_address']
                 self._log.info(f"The local IP address of the device '{device_name}' is "
                                f"{validation.validate_print_ip_address(ip_address)}")
 
             # Change IP
-            elif answer_operation == self._CHOICES_REGISTERED_DEVICE[3]:
+            elif answer_operation == self._CHOICES_REGISTERED_DEVICE[5]:
                 old_ip_address = self._registered_devices[device_name]["ip_address"]
                 new_ip_address = prompt.prompt_ip_address(self._registered_devices)
                 self._registered_devices[device_name]["ip_address"] = new_ip_address
@@ -200,7 +235,7 @@ class Client:
                                f"'{validation.validate_print_ip_address(new_ip_address)}'")
 
             # Rename device
-            elif answer_operation == self._CHOICES_REGISTERED_DEVICE[4]:
+            elif answer_operation == self._CHOICES_REGISTERED_DEVICE[6]:
                 new_device_name = prompt.prompt_device_name(self._registered_devices)
 
                 # If remote access is activated rename the client authorization files
@@ -222,7 +257,7 @@ class Client:
                 device_name = new_device_name
 
             # Delete device
-            elif answer_operation == self._CHOICES_REGISTERED_DEVICE[5]:
+            elif answer_operation == self._CHOICES_REGISTERED_DEVICE[7]:
                 if remote_access:
                     confirmed = questionary.confirm(
                         "WARNING: This client is NOT deleted automatically at the smart home "
@@ -247,7 +282,7 @@ class Client:
                     break
 
             # Back to main
-            elif answer_operation == self._CHOICES_REGISTERED_DEVICE[6]:
+            elif answer_operation == self._CHOICES_REGISTERED_DEVICE[8]:
                 break
 
     def _client_local(self, device_name):
@@ -280,6 +315,10 @@ class Client:
                         onion_address = self._registered_devices[device_name]["onion_address"]
                     else:
                         onion_address = None
+
+                    if command in [constant.LOCAL_COMMANDS[0], constant.LOCAL_COMMANDS[1]]:
+                        self._log.info("Command deactivated")
+                        continue
 
                     # Remote access activation
                     if command == constant.LOCAL_COMMANDS[2]:
@@ -444,16 +483,18 @@ class Client:
             if response == constant.ERROR_RESPONSE:
                 self._log.error("There was an error at the smart home device!")
             else:
-                # Temperature
-                if command == constant.LOCAL_COMMANDS[0]:
-                    self._log.info(f"Current temperature is {response}°C")
-
-                # Time
-                elif command == constant.LOCAL_COMMANDS[1]:
-                    self._log.info(f"Current time is {response}")
+                # # TODO: unneeded function -> delete this
+                # # Temperature
+                # if command == constant.LOCAL_COMMANDS[0]:
+                #     self._log.info(f"Current temperature is {response}°C")
+                #
+                # # TODO: unneeded function -> delete this
+                # # Time
+                # elif command == constant.LOCAL_COMMANDS[1]:
+                #     self._log.info(f"Current time is {response}")
 
                 # Remote access activation
-                elif command.split(constant.DELIMITER_PARAM)[0] == constant.LOCAL_COMMANDS[2]:
+                if command.split(constant.DELIMITER_PARAM)[0] == constant.LOCAL_COMMANDS[2]:
                     onion_address = response
 
                     # Tor doesn't support two client authorization files with the same Onion 
@@ -622,3 +663,262 @@ class Client:
                 except Exception as error:
                     self._log.error(f"Error while deleting the client authorization file for "
                                     f"device '{device_name}': {error}")
+
+    def _add_onion_service_auth(self, device_name, onion_address, private_key):
+        """Add a new client authorization file for the given device. First checks if the Tor
+        Browser is running and asks the user to close it.
+
+        Args:
+            device_name: Name of the smart home device to add a client authorization for as string.
+            onion_address: Onion address of the Tor Onion Service at the OSCAHR proxy as string.
+            private_key: Private key for the Tor client authorization as string.
+
+        Raises:
+            RuntimeError: Tor Browser is running and the user decided to exit.
+        """
+
+        while self._check_torbrowser_running():
+            answer_running = questionary.confirm("Tor Browser is running, please close it "
+                                                 "first! To proceed after closing the Tor "
+                                                 "Browser type Y, to exit type N").unsafe_ask()
+            if not answer_running:
+                raise RuntimeError("Tor Browser is running, couldn't add new client "
+                                   "authorization file!")
+
+        tor.add_onion_service_auth(self._torbrowser_auth_dir, device_name, onion_address,
+                                   private_key)
+
+    def _check_torbrowser_running(self):
+        """Checks if the Tor Browser is running.
+
+        Returns:
+            True if the Tor Browser is running, False if not.
+        """
+
+        # The Firefox binary in the Tor Browser Bundle is located in the base dir with the name
+        # "firefox.real"/"firefox.exe"
+        if os.name != 'nt':
+            tor_firefox_binary = self._torbrowser_base_dir / "firefox.real"
+        else:
+            tor_firefox_binary = self._torbrowser_base_dir / "firefox.exe"
+
+        for proc in psutil.process_iter():
+            try:
+                if str(tor_firefox_binary) in proc.exe():
+                    return True
+            # Ignore if the process exited between the interation and the proc.exe() call or
+            # the access for calling proc.exe() for the current process was denied
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+
+        return False
+
+    def _start_torbrowser(self, onion_address, port, http):
+        """Starts the Tor Browser via the startup script if it isn't running already.
+        Opens the given Tor Onion address with the given port using the given hypertext transfer
+        protocol.
+
+        Args:
+            onion_address: Onion address of the Onion Service to access as string.
+            port: Integer port number to use for the Onion Service.
+            http: "http" or "https" as string.
+        """
+
+        if self._check_torbrowser_running():
+            self._log.warning("Tor Browser is already running, please open the Tor Onion address "
+                              f"({http}://{onion_address}:{port}) of the smart home device "
+                              "manually!")
+        else:
+            # Start a subprocess to start the Tor Browser detached from the terminal/subprocess
+            # and open the Onion-address:port of the smart home device.
+            subprocess.Popen(
+                [self._torbrowser_startup, http + "://" + onion_address + ":" + str(port)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+
+    def _get_torbrowser_paths(self, force_manual=False):
+        """Gets the base path for the Tor Browser, the path for the Tor Browser startup script
+        and the path for the client authorization files directory.
+        First tries to read Tor Browser base directory from previously saved file, afterwards
+        search for installed 'torbrowser-launcher' package on non Windows systems (gets paths
+        fully automated). If both previous attempts failed the Tor Browser base directory can be
+        manually entered by the user. If the path was entered manually finally asks the user to
+        save the base directory to a file for future use.
+
+        Args:
+            force_manual: Optional; Boolean to force the use of manual mode. Default is False.
+
+        Returns:
+            Tor Browser pathlib objects to the base directory, the startup script and the client
+            authorization files directory in a tuple.
+
+        Raises:
+            FileNotFoundError: Tor Browser directory or one of the mandatory files wasn't found.
+        """
+
+        torbrowserpath_file = self._config.oscahr_config_dir / "torbrowser.path"
+        windows = True if os.name == 'nt' else False
+        torbrowser_base_dir = None
+        manual_mode = False
+
+        # Read from previously saved file
+        if not force_manual and torbrowserpath_file.exists():
+            temp_torbrowser_dir = pathlib.Path(torbrowserpath_file.read_text().strip())
+            if temp_torbrowser_dir.exists():
+                torbrowser_base_dir = temp_torbrowser_dir
+                self._log.debug(f"Found Tor Browser base directory at '{torbrowser_base_dir}' "
+                                "through previously saved file")
+            else:
+                self._log.warning("Previously saved Tor Browser directory doesn't exist anymore! "
+                                  "Proceeding with normal process of getting directory...")
+
+        # On non Windows systems look for torbrowser-launcher package if Tor Browser directory
+        # wasn't found in previously saved file and manual mode wasn't forced
+        if not force_manual and torbrowser_base_dir is None and not windows:
+            torbrowser_launcher = shutil.which("torbrowser-launcher")
+
+            if torbrowser_launcher is not None:
+                # Build path to torrc and Tor Browser binary following the torbrowser-launcher
+                # source: https://github.com/micahflee/torbrowser-launcher/blob/master/torbrowser_launcher/common.py
+                architecture = "x86_64" if "64" in platform.architecture()[0] else "i686"
+
+                temp_torbrowser_dir = pathlib.Path.home() / ".local" / "share" / "torbrowser" / \
+                                      "tbb" / architecture
+
+                if not temp_torbrowser_dir.exists():
+                    self._log.warning(
+                        "Found installed package 'torbrowser-launcher' but the Tor Browser folder "
+                        f"in '{temp_torbrowser_dir}' doesn't exist. If the 'torbrowser-launcher' "
+                        "package is newly installed, please start the Tor Browser manually the "
+                        "first time and try again.")
+                else:
+                    # The directory starts with "tor-browser_" followed by the installed language
+                    # (e.g. "en-US"). Lookup the directory built so far for any installed Tor
+                    # Browser language.
+                    dir_language = list(temp_torbrowser_dir.glob("tor-browser_*"))
+
+                    if len(dir_language) == 1:
+                        torbrowser_base_dir = dir_language[0] / "Browser"
+                        self._log.debug(f"Got Tor Browser directory '{torbrowser_base_dir}' "
+                                        "through 'torbrowser-launcher' package")
+                    else:
+                        self._log.warning(
+                            "Tor Browser directory tried to find via the 'torbrowser-launcher' "
+                            "package wasn't distinct, proceeding with manual input...")
+            else:
+                self._log.info("OSCAHR couldn't find your Tor Browser automatically. Please "
+                               "install it through the debian package 'torbrowser-launcher' or "
+                               "download it manually from https://www.torproject.org/.")
+
+        # If both previous attempts failed or manual mode was forced
+        if torbrowser_base_dir is None:
+            manual_mode = True
+            if not windows:
+                temp_torbrowser_dir = pathlib.Path.expanduser(pathlib.Path(questionary.path(
+                    "Please enter the root directory of your manually installed Tor Browser "
+                    "(usually in this directory a file named 'start-tor-browser.desktop' and a "
+                    "directory named 'Browser' is located):",
+                    validate=lambda text: pathlib.Path.expanduser(pathlib.Path(text)).exists(),
+                    only_directories=True
+                ).unsafe_ask()))
+            else:
+                temp_torbrowser_dir = pathlib.Path.expanduser(pathlib.Path(questionary.path(
+                    "Please enter the root directory of your Tor Browser (usually in this "
+                    "directory a shortcut file named 'Start Tor Browser' and a directory named "
+                    "'Browser' is located):",
+                    validate=lambda text: pathlib.Path.expanduser(pathlib.Path(text)).exists(),
+                    only_directories=True
+                ).unsafe_ask()))
+
+            torbrowser_base_dir = temp_torbrowser_dir / "Browser"
+            self._log.debug(f"Got Tor Browser base directory at '{torbrowser_base_dir}' through "
+                            "manual input")
+
+        # For all modes (saved file, auto and manual) build the startup and torrc path and check
+        # if all paths exist
+        torbrowser_torrc = torbrowser_base_dir / "TorBrowser" / "Data" / "Tor" / "torrc"
+
+        if not windows:
+            torbrowser_startup = torbrowser_base_dir / "start-tor-browser"
+        else:
+            torbrowser_startup = torbrowser_base_dir / "firefox.exe"
+
+        if not torbrowser_base_dir.exists() or \
+                not torbrowser_startup.exists() or \
+                not torbrowser_torrc.exists():
+            raise FileNotFoundError("Tor Browser directory or one of the mandatory files not "
+                                    "found!")
+        else:
+            self._log.debug(f"Found Tor Browser torrc file at '{torbrowser_torrc}'")
+            self._log.debug(f"Found Tor Browser startup file at '{torbrowser_startup}'")
+
+            torbrowser_auth_dir = self._get_torbrowser_auth_dir(torbrowser_torrc)
+
+            # If the Tor Browser directory was entered manually, offer to save it
+            if manual_mode:
+                save = questionary.confirm(
+                    f"Do you want to save the Tor Browser directory '{torbrowser_base_dir}' for "
+                    "future use of OSCAHR?").unsafe_ask()
+                if save:
+                    torbrowserpath_file.write_text(str(torbrowser_base_dir))
+
+            return torbrowser_base_dir, torbrowser_startup, torbrowser_auth_dir
+
+    def _get_torbrowser_auth_dir(self, torbrowser_torrc):
+        """Reads the given torrc file and extracts the configured ClientOnionAuthDir. If no
+        ClientOnionAuthDir is configured a directory is created and added to the torrc file.
+
+        Args:
+            torbrowser_torrc: A pathlib object containing the path to the Tor configuration file.
+
+        Returns:
+            A pathlib object containing the path to the client onion authorization directory.
+
+        Raises:
+            FileNotFoundError: A ClientOnionAuthDir is specified in the torrc file but it doesn't
+                exist.
+        """
+
+        auth_line = None
+
+        with open(torbrowser_torrc, "r") as f:
+            for line in f:
+                if line.startswith("ClientOnionAuthDir"):
+                    auth_line = line.strip()
+                    break
+
+        if auth_line is not None:
+            auth_dir = pathlib.Path(auth_line.split(" ", 1)[1])
+
+            if not auth_dir.exists():
+                raise FileNotFoundError("ClientOnionAuthDir is specified in torrc, but directory "
+                                        f"doesn't exist! Path: '{auth_dir}'")
+        else:
+            auth_dir = self._add_torrc_auth_dir(torbrowser_torrc)
+
+        self._log.debug(f"Found Tor Browser client authorization directory at '{auth_dir}'")
+        return auth_dir
+
+    def _add_torrc_auth_dir(self, torbrowser_torrc):
+        """Creates an "onion-auth" directory in the same directory as the given torrc path and
+        adds it as ClientOnionAuthDir to the given torrc file.
+
+        Args:
+            torbrowser_torrc: A pathlib object containing the path to the Tor configuration file.
+
+        Returns:
+            A pathlib object containing the path to the created client authorization directory.
+        """
+
+        # Take the parent folder of the torrc-path and add "onion-auth", which is usually the
+        # default client onion auth directory
+        auth_dir = torbrowser_torrc.parent / "onion-auth"
+        auth_dir.mkdir(mode=0o700, exist_ok=True)
+
+        with open(torbrowser_torrc, "a") as f:
+            f.write(f"ClientOnionAuthDir {auth_dir}\n")
+
+        self._log.debug(f"Added new Tor Browser client authorization directory '{auth_dir}'")
+
+        return auth_dir

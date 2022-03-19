@@ -9,7 +9,7 @@ Author: Simon Birngruber (IoT-Lab, University of Applied Sciences Upper Austria,
 License: MIT
 """
 
-COM_PORT = 42021  # Static OSCAHR communication port
+COM_PORT = 80  # Static OSCAHR communication port
 ERROR_RESPONSE = "ERROR"
 SUCCESS_RESPONSE = "SUCCESS"
 DELIMITER_PARAM = ":"
@@ -21,7 +21,6 @@ LOCAL_COMMANDS = [
     "deactivate_remote_access",
     "delete_onion_service",
     "exit",
-    "show_webinterface"
 ]
 LOCAL_COMMANDS_TEXT = [
     "Get temperature",
@@ -32,12 +31,12 @@ LOCAL_COMMANDS_TEXT = [
     "Disconnect and back to device menu"
 ]
 REMOTE_COMMANDS = [
-    LOCAL_COMMANDS[0],  # Temperature
-    LOCAL_COMMANDS[1],  # Time
+    LOCAL_COMMANDS[0],  # Activate webinterface
+    LOCAL_COMMANDS[1],  # Open browser and show webinterface
     LOCAL_COMMANDS[5]   # Exit
 ]
 REMOTE_COMMANDS_TEXT = [
-    LOCAL_COMMANDS_TEXT[0],  # Temperature
-    LOCAL_COMMANDS_TEXT[1],  # Time
+    LOCAL_COMMANDS_TEXT[0],  # Activate webinterface
+    LOCAL_COMMANDS_TEXT[1],  # Open browser and show webinterface
     LOCAL_COMMANDS_TEXT[5]   # Exit
 ]

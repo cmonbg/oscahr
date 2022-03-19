@@ -79,7 +79,7 @@ class SmartHomeDevice:
         # Start Tor Onion Service if one exists, if not ignore errors
         try:
             self._onion_service_address = tor.start_disk_v3_onion_service(
-                self._onion_service_dir, self._config.tor_control_port, constant.COM_PORT)
+                self._onion_service_dir, self._config.tor_control_port, constant.COM_PORT, "192.168.1.1")
         except Exception as error:
             self._log.debug(error)
 
