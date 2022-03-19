@@ -184,16 +184,11 @@ class SmartHomeDevice:
 
             # Temperature (random example between -30°C and 40°C)
             if command == constant.LOCAL_COMMANDS[0]:
-                data.send_buffer = str(round(random.uniform(-30, 40), 2))
+                data.send_buffer = "Function_deactivated"  # str(round(random.uniform(-30, 40), 2))
 
             # Time
             elif command == constant.LOCAL_COMMANDS[1]:
-                data.send_buffer = time.strftime("%H:%M:%S", time.localtime())
-
-            # Webinterface
-            elif command == constant.LOCAL_COMMANDS[6]:
-                # TODO: activate webinterface here
-                pass
+                data.send_buffer = "Function_deactivated"  # time.strftime("%H:%M:%S", time.localtime())
 
             # Exit
             elif command == constant.LOCAL_COMMANDS[5]:
