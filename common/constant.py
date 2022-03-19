@@ -9,7 +9,7 @@ Author: Simon Birngruber (IoT-Lab, University of Applied Sciences Upper Austria,
 License: MIT
 """
 
-COM_PORT = 80  # Static OSCAHR communication port
+COM_PORT = 42021  # Static OSCAHR communication port
 ERROR_RESPONSE = "ERROR"
 SUCCESS_RESPONSE = "SUCCESS"
 DELIMITER_PARAM = ":"
