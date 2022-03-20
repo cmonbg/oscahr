@@ -91,7 +91,7 @@ def remove_disk_v3_onion_service(onion_service_dir, tor_control_port):
             with Controller.from_port(port=tor_control_port) as controller:
                 controller.authenticate()  # Uses authentication cookie from path given in torrc
                 _log.debug("Authenticated to the Tor controller")
-
+                print(str(onion_service_dir))
                 controller.remove_hidden_service(str(onion_service_dir))
                 _log.info("Successfully removed Tor Onion Service")
 

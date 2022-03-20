@@ -356,8 +356,15 @@ class Client:
                             "smart home device! All registered clients are also deleted and loose "
                             "their remote access to the smart home device and have to be readded "
                             "manually! Do you want to continue?", default=False).unsafe_ask()
-                        if not confirmed:
-                            continue
+
+                        if confirmed:
+                            tor.delete_onion_service_auth(
+                                self._torbrowser_auth_dir, device_name, onion_address,
+                                self._registered_devices[device_name]["private_key"])
+                            self._registered_devices.pop(device_name)
+                            tor.set_registered_devices(self._registered_devices,
+                                                       self._registered_devices_file)
+                            self._log.info(f"Successfully removed device '{device_name}'!")
 
                     # Send command, receive and process response, if an error occurs exit
                     if not self._send_receive_process(device_name, command, s, public_key,
@@ -926,3 +933,4 @@ class Client:
         self._log.debug(f"Added new Tor Browser client authorization directory '{auth_dir}'")
 
         return auth_dir
+
