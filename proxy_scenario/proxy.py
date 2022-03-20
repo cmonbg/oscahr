@@ -97,7 +97,7 @@ class Proxy:
 
             if onion_service_address != self._registered_devices[device]["onion_address"]:
                 self._log.warning(f"Tor Onion address for device '{device}' changed, please "
-                                  "remove and readd it manually!")
+                                  "remove and read it manually!")
             else:
                 service_counter += 1
 

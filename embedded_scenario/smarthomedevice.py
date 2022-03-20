@@ -233,7 +233,7 @@ class SmartHomeDevice:
                     except Exception as error:
                         data.send_buffer = constant.ERROR_RESPONSE
                         self._log.error("Error while removing client authorization file: "
-                                        f"{error}")
+                                        f"{error} in {traceback.print_exc()}")
 
                 # Onion service removal
                 elif command == constant.LOCAL_COMMANDS[4]:
