@@ -490,15 +490,13 @@ class Client:
             if response == constant.ERROR_RESPONSE:
                 self._log.error("There was an error at the smart home device!")
             else:
-                # # TODO: unneeded function -> delete this
-                # # Temperature
-                # if command == constant.LOCAL_COMMANDS[0]:
-                #     self._log.info(f"Current temperature is {response}°C")
-                #
-                # # TODO: unneeded function -> delete this
-                # # Time
-                # elif command == constant.LOCAL_COMMANDS[1]:
-                #     self._log.info(f"Current time is {response}")
+                if command == constant.LOCAL_COMMANDS[0]:
+                    # do something if needed
+                    pass
+
+                elif command == constant.LOCAL_COMMANDS[1]:
+                    # do something if needed
+                    pass
 
                 # Remote access activation
                 if command.split(constant.DELIMITER_PARAM)[0] == constant.LOCAL_COMMANDS[2]:

@@ -16,28 +16,28 @@ SUCCESS_RESPONSE = "SUCCESS"
 DELIMITER_PARAM = ":"
 DELIMITER_END = ";"
 LOCAL_COMMANDS = [
-    "get_temperature",
-    "get_time",
+    "unused",
+    "unused2",
     "activate_remote_access",
     "deactivate_remote_access",
     "delete_onion_service",
     "exit",
 ]
 LOCAL_COMMANDS_TEXT = [
-    "DEACTIVATED Get temperature",
-    "DEACTIVATED Get current time",
+    "Unused command slot",
+    "Unused command slot 2",
     "Activate remote access",
     "Deactivate remote access",
     "Delete Tor Onion Service",
     "Disconnect and back to device menu"
 ]
 REMOTE_COMMANDS = [
-    LOCAL_COMMANDS[0],  # Activate webinterface
-    LOCAL_COMMANDS[1],  # Open browser and show webinterface
+    LOCAL_COMMANDS[0],  # Unused command slot
+    LOCAL_COMMANDS[1],  # Unused command slot 2
     LOCAL_COMMANDS[5]   # Exit
 ]
 REMOTE_COMMANDS_TEXT = [
-    LOCAL_COMMANDS_TEXT[0],  # Activate webinterface
-    LOCAL_COMMANDS_TEXT[1],  # Open browser and show webinterface
+    LOCAL_COMMANDS_TEXT[0],  # Unused command slot
+    LOCAL_COMMANDS_TEXT[1],  # Unused command slot 2
     LOCAL_COMMANDS_TEXT[5]   # Exit
 ]

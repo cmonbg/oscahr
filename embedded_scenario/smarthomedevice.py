@@ -182,13 +182,15 @@ class SmartHomeDevice:
             data.receive_buffer = ""  # Reset buffer
             data.timer = None  # Reset timer
 
-            # Temperature (random example between -30°C and 40°C)
             if command == constant.LOCAL_COMMANDS[0]:
-                data.send_buffer = "Function_deactivated"  # str(round(random.uniform(-30, 40), 2))
+                # do something if needed
+                data.send_buffer = "empty"
+                pass
 
-            # Time
             elif command == constant.LOCAL_COMMANDS[1]:
-                data.send_buffer = "Function_deactivated"  # time.strftime("%H:%M:%S", time.localtime())
+                # do something if needed
+                data.send_buffer = "empty"
+                pass
 
             # Exit
             elif command == constant.LOCAL_COMMANDS[5]:

@@ -205,7 +205,10 @@ class OscahrConfig:
             A pathlib object containing the path to the OSCAHR config directory.
         """
 
-        oscahr_config_dir = pathlib.Path.home() / ".config" / "oscahr" / oscahr_type
+        # Get the project root to know where to create the config
+        project_root = pathlib.Path(__file__).parent.resolve().parent.resolve()
+
+        oscahr_config_dir = project_root / ".oscahr_config" / oscahr_type
         oscahr_config_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         return oscahr_config_dir
 
