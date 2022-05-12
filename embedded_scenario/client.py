@@ -168,7 +168,7 @@ class Client:
         JSON file.
 
         Args:
-            device_name: Name of the smart home device to choose a operation for as string.
+            device_name: Name of the smart home device to choose an operation for as string.
         """
 
         # Loop the device menu until exit (back to main menu)
