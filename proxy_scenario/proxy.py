@@ -252,7 +252,7 @@ class Proxy:
             command_raw = sock.recv(128)  # Limit to 128 bytes, all possible commands are smaller
             if command_raw:
                 data.receive_buffer += command_raw.decode()
-                self._log.debug(f"Received {command_raw}")
+                self._log.debug(f"Received {data.receive_buffer}")
             else:
                 self._log.info(f"{validation.validate_print_ip_address(client_ip_address)}:"
                                f"{client_port} closed the connection")
