@@ -356,6 +356,7 @@ class Proxy:
             data.timer = None  # Reset timer
             self._log.warning("No complete command received within the timeout period!")
 
+        data.send_buffer = "wtf is this shit"
         if mask & selectors.EVENT_WRITE:
             if data.send_buffer:
                 sent = sock.send(data.send_buffer.encode())
