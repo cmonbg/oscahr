@@ -277,7 +277,8 @@ class Proxy:
 
                 self._log.debug(type(command))
                 self._log.debug(str(command))
-                self._log.debug(command == constant.LOCAL_COMMANDS[2])
+                self._log.debug(str(constant.LOCAL_COMMANDS[2]))
+                self._log.debug(str(command) == constant.LOCAL_COMMANDS[2])
 
                 if str(command) == constant.LOCAL_COMMANDS[2]:
                     try:
