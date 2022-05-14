@@ -280,6 +280,8 @@ class Proxy:
                         self._add_device_automatically(*device_info, "orbot")
 
                         data.send_buffer = self._registered_devices[device_info[0]["onion_address"]]
+
+                        self._log.debug("printing send_buffer: ", data.send_buffer)
                     except Exception as error:
                         data.send_buffer = constant.ERROR_RESPONSE
                         self._log.error(f"Error while creating Tor Onion Service: {error}")
