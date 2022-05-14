@@ -238,7 +238,7 @@ class Proxy:
 
         if mask & selectors.EVENT_READ:
             data.timer = time.time()
-            command_raw = sock.recv(128)  # Limit to 128 bytes, all possible commands are smaller
+            command_raw = sock.recv(256)  # Limit to 256 bytes, all possible commands are smaller
             if command_raw:
                 data.receive_buffer += command_raw.decode()
                 self._log.debug(f"Received {data.receive_buffer}")
@@ -274,7 +274,7 @@ class Proxy:
             # Service at localhost - IPv4 address 127.0.0.1)
             elif ipaddress.ip_address(client_ip_address) != ipaddress.IPv4Address("127.0.0.1"):
                 # Remote access activation
-                if command == constant.LOCAL_COMMANDS[2]:
+                if str(command) == constant.LOCAL_COMMANDS[2]:
                     try:
                         device_info = parameter.split(constant.DELIMITER_PARAM)
                         self._add_device_automatically(*device_info, "orbot")
