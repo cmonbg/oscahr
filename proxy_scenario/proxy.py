@@ -274,10 +274,12 @@ class Proxy:
             # Service at localhost - IPv4 address 127.0.0.1)
             elif ipaddress.ip_address(client_ip_address) != ipaddress.IPv4Address("127.0.0.1"):
                 # Remote access activation
+
+                self._log.debug(command, constant.LOCAL_COMMANDS[2])
+
                 if str(command) == constant.LOCAL_COMMANDS[2]:
                     try:
                         self._log.debug("Activating remote access for device")
-
                         device_info = parameter.split(constant.DELIMITER_PARAM)
                         self._add_device_automatically(*device_info, "orbot")
 
