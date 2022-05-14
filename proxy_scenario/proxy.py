@@ -276,6 +276,8 @@ class Proxy:
                 # Remote access activation
                 if str(command) == constant.LOCAL_COMMANDS[2]:
                     try:
+                        self._log.debug("Activating remote access for device")
+
                         device_info = parameter.split(constant.DELIMITER_PARAM)
                         self._add_device_automatically(*device_info, "orbot")
 
