@@ -136,7 +136,7 @@ class Proxy:
 
             # Add a new device
             if answer_operation == self._NEW_DEVICE_STRING:
-                self._add_device()
+                self._add_device_manually()
 
             # Registered devices
             elif answer_operation == self._REGISTERED_DEVICES_STRING:
@@ -152,15 +152,16 @@ class Proxy:
 
             # Automatic adding mode
             elif answer_operation == self._AUTO_ADD_MODE_STRING:
-                self._orbot_add_device()
+                self.orbot_mode()
 
             # Exit
             elif answer_operation == self._EXIT_STRING:
                 break
 
-    def _orbot_add_device(self):
-        # TODO: create socket
+    def orbot_mode(self):
+        """Starts OSCAHR in Orbot mode, devices can be automatically added from the Orbot app.
 
+        """
 
         self._conn_selector = selectors.DefaultSelector()
 
@@ -191,18 +192,6 @@ class Proxy:
                             self._handle_connection_event(key, mask)
         except Exception as error:
             self._log.error(f"Error while starting the server: {error} in {traceback.print_exc()}")
-
-        
-        # TODO: get pub key from orbot
-
-
-
-
-        # TODO: send onion address
-
-
-
-        pass
 
     def _accept_connection(self, sock):
         """Accepts an connection from a given socket and registers it at the selector
@@ -265,7 +254,7 @@ class Proxy:
             # Cut at delimiter and discard everything afterwards
             data.receive_buffer = data.receive_buffer.split(constant.DELIMITER_END)[0]
 
-            # Split at delimiter to seperate command and parameter, just one parameter allowed, if
+            # Split at delimiter to separate command and parameter, just one parameter allowed, if
             # there is none partition returns an empty string
             command, _, parameter = data.receive_buffer.partition(constant.DELIMITER_PARAM)
             self._log.info(f"Processing command '{command}' with parameter '{parameter}'")
@@ -273,18 +262,8 @@ class Proxy:
             data.receive_buffer = ""  # Reset buffer
             data.timer = None  # Reset timer
 
-            if command == constant.LOCAL_COMMANDS[0]:
-                # do something if needed
-                data.send_buffer = "empty"
-                pass
-
-            elif command == constant.LOCAL_COMMANDS[1]:
-                # do something if needed
-                data.send_buffer = "empty"
-                pass
-
             # Exit
-            elif command == constant.LOCAL_COMMANDS[5]:
+            if command == constant.LOCAL_COMMANDS[5]:
                 self._log.info(f"{validation.validate_print_ip_address(client_ip_address)}:"
                                f"{client_port} closed the connection")
                 self._conn_selector.unregister(sock)
@@ -297,24 +276,15 @@ class Proxy:
                 # Remote access activation
                 if command == constant.LOCAL_COMMANDS[2]:
                     try:
-                        # If there is an existing Onion Service, add the client authorization
-                        # file and reload the Tor controller, otherwise create a new Onion Service
-                        if tor.check_existing_onion_service(self._onion_service_main_dir):
-                            tor.add_disk_v3_onion_service_auth(self._onion_service_main_dir,
-                                                               client_pub_key=parameter)
-                            tor.reload_disk_v3_onion_service(self._onion_service_main_dir,
-                                                             self._config.tor_control_port,
-                                                             constant.ROUTER_PORT)
-                        else:
-                            self._onion_service_address = tor.create_disk_v3_onion_service(
-                                self._onion_service_main_dir, self._config.tor_control_port,
-                                client_pub_key=parameter, port=constant.ROUTER_PORT)
+                        device_info = parameter.split(constant.DELIMITER_PARAM)
+                        self._add_device_automatically(*device_info, "orbot")
 
-                        data.send_buffer = self._onion_service_address
+                        data.send_buffer = self._registered_devices[device_info[0]["onion_address"]]
                     except Exception as error:
                         data.send_buffer = constant.ERROR_RESPONSE
                         self._log.error(f"Error while creating Tor Onion Service: {error}")
 
+                # TODO
                 # Remote access deactivation
                 elif command == constant.LOCAL_COMMANDS[3]:
                     try:
@@ -328,6 +298,7 @@ class Proxy:
                         self._log.error("Error while removing client authorization file: "
                                         f"{error} in {traceback.print_exc()}")
 
+                # TODO
                 # Onion service removal
                 elif command == constant.LOCAL_COMMANDS[4]:
                     try:
@@ -356,7 +327,6 @@ class Proxy:
             data.timer = None  # Reset timer
             self._log.warning("No complete command received within the timeout period!")
 
-        data.send_buffer = "wtf is this shit"
         if mask & selectors.EVENT_WRITE:
             if data.send_buffer:
                 sent = sock.send(data.send_buffer.encode())
@@ -367,8 +337,36 @@ class Proxy:
                 # Remove sent bytes from the send buffer
                 data.send_buffer = data.send_buffer[sent:]
 
+    def _add_device_automatically(self, device_name, ip_address, port, public_key, client_name):
+        onion_service_dir = self._onion_service_main_dir / device_name
 
-    def _add_device(self):
+        self._log.info("Adding new smart home device...")
+
+        # Start Tor to be able to create an new Onion Service, afterwards terminate the Tor
+        # subprocess (not needed anymore in management mode)
+        self._config.start_tor()
+        onion_service_address = tor.create_disk_v3_onion_service(
+            onion_service_dir, self._config.tor_control_port, public_key, port, ip_address,
+            client_name)
+        self._config.terminate_tor()
+
+        # Build the dictionary entry for the new device
+        new_device = {
+            device_name: {
+                "ip_address": ip_address,
+                "port": port,
+                "onion_address": onion_service_address,
+                "clients": {
+                    client_name: public_key
+                }
+            }
+        }
+
+        # Add the new device to the dictionary and write to JSON file
+        self._registered_devices.update(new_device)
+        self._set_registered_devices()
+
+    def _add_device_manually(self):
         """Guides the user through the process of adding a new smart home device. Updates the
         registered devices class dictionary and saves the changes to the JSON file.
         """

@@ -36,6 +36,7 @@ def main():
     parser = argparse.ArgumentParser(description="Start OSCAHR proxy scenario in proxy mode.")
     parser.add_argument("-m", "--manage", action="store_true",
                         help="manage smart home devices (add/delete/modify)")
+    parser.add_argument("-o", "--orbot", action="store_true", help="start automatically in orbot mode")
     logging_group = parser.add_mutually_exclusive_group()
     logging_group.add_argument("-v", "--verbose", action="store_true",
                                help="increase output verbosity to debug level")
@@ -49,6 +50,8 @@ def main():
 
         if args.manage:
             Proxy(oscahr_config).manage_devices()
+        elif args.orbot:
+            Proxy(oscahr_config).orbot_mode()
         else:
             Proxy(oscahr_config).start_proxy()
 
