@@ -275,7 +275,9 @@ class Proxy:
             elif ipaddress.ip_address(client_ip_address) != ipaddress.IPv4Address("127.0.0.1"):
                 # Remote access activation
 
-                self._log.debug(command, constant.LOCAL_COMMANDS[2])
+                self._log.debug(type(command))
+                self._log.debug(str(command))
+                self._log.debug(command)
 
                 if str(command) == constant.LOCAL_COMMANDS[2]:
                     try:
