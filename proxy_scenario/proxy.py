@@ -258,8 +258,9 @@ class Proxy:
             # there is none partition returns an empty string
             command, _, parameter = data.receive_buffer.partition(constant.DELIMITER_PARAM)
 
-            # for some strange reason there is a singular '\' in the beginning, trim it
-            command = command.split("\\")[1]
+            # for some strange reason there is a singular '\' or '[' in the beginning, removen
+            # it
+            command = command[1:]
 
             self._log.info(f"Processing command '{command}' with parameter '{parameter}'")
 
