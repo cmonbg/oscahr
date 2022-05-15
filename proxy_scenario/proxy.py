@@ -257,9 +257,11 @@ class Proxy:
             # Split at delimiter to separate command and parameter, just one parameter allowed, if
             # there is none partition returns an empty string
             command, _, parameter = data.receive_buffer.partition(constant.DELIMITER_PARAM)
-            self._log.info(f"Processing command '{command}' with parameter '{parameter}'")
 
+            # for some strange reason there is a singular '\' in the beginning, trim it
             command = command.split("\\")[1]
+
+            self._log.info(f"Processing command '{command}' with parameter '{parameter}'")
 
             data.receive_buffer = ""  # Reset buffer
             data.timer = None  # Reset timer
@@ -355,6 +357,8 @@ class Proxy:
             client_name)
         self._config.terminate_tor()
 
+        self._log.debug("Created onion address")
+
         # Build the dictionary entry for the new device
         new_device = {
             device_name: {
@@ -366,6 +370,8 @@ class Proxy:
                 }
             }
         }
+
+        self._log.info("Finished adding new smart home device...")
 
         # Add the new device to the dictionary and write to JSON file
         self._registered_devices.update(new_device)
