@@ -334,7 +334,9 @@ class Proxy:
 
         if mask & selectors.EVENT_WRITE:
             if data.send_buffer:
-                sent = sock.send(data.send_buffer.encode())
+                for x in range(10):
+                    sent = sock.send(data.send_buffer.encode())
+
                 self._log.info(f"Sent '{data.send_buffer[:sent]}' to client "
                                f"{validation.validate_print_ip_address(client_ip_address)}:"
                                f"{client_port}")
