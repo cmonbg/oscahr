@@ -276,20 +276,15 @@ class Proxy:
                 # Remote access activation
 
                 command = command.split("\\")[1]
-                self._log.debug(type(command))
-                self._log.debug(command)
-                self._log.debug(constant.LOCAL_COMMANDS[2])
-                self._log.debug(command == constant.LOCAL_COMMANDS[2])
 
                 if str(command) == constant.LOCAL_COMMANDS[2]:
                     try:
-                        self._log.debug("Activating remote access for device")
                         device_info = parameter.split(constant.DELIMITER_PARAM)
-                        self._add_device_automatically(*device_info, "orbot")
+                        self._log.debug("Activating remote access for device " + device_info[0])
+                        # self._add_device_automatically(*device_info, "orbot")
 
-                        data.send_buffer = self._registered_devices[device_info[0]["onion_address"]]
+                        data.send_buffer = "success"  # self._registered_devices[device_info[0]["onion_address"]]
 
-                        self._log.debug("printing send_buffer: ", data.send_buffer)
                     except Exception as error:
                         data.send_buffer = constant.ERROR_RESPONSE
                         self._log.error(f"Error while creating Tor Onion Service: {error}")
@@ -340,7 +335,6 @@ class Proxy:
         if mask & selectors.EVENT_WRITE:
             if data.send_buffer:
                 sent = sock.send(data.send_buffer.encode())
-                self._log.debug(data.send_buffer)
                 self._log.info(f"Sent '{data.send_buffer[:sent]}' to client "
                                f"{validation.validate_print_ip_address(client_ip_address)}:"
                                f"{client_port}")
