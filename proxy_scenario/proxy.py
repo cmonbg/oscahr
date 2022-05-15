@@ -275,15 +275,13 @@ class Proxy:
             elif ipaddress.ip_address(client_ip_address) != ipaddress.IPv4Address("127.0.0.1"):
                 # Remote access activation
 
-                command = command.split("\\")[1]
-
                 if str(command) == constant.LOCAL_COMMANDS[2]:
                     try:
                         device_info = parameter.split(constant.DELIMITER_PARAM)
                         self._log.debug("Activating remote access for device " + device_info[0])
-                        # self._add_device_automatically(*device_info, "orbot")
+                        self._add_device_automatically(*device_info, "orbot")
 
-                        data.send_buffer = "success"  # self._registered_devices[device_info[0]["onion_address"]]
+                        data.send_buffer = self._registered_devices[device_info[0]["onion_address"]]
 
                     except Exception as error:
                         data.send_buffer = constant.ERROR_RESPONSE
@@ -334,12 +332,10 @@ class Proxy:
 
         if mask & selectors.EVENT_WRITE:
             if data.send_buffer:
-                for x in range(10):
-                    sent = sock.send(data.send_buffer.encode())
-
+                sent = sock.send(data.send_buffer.encode())
                 self._log.info(f"Sent '{data.send_buffer[:sent]}' to client "
-                               f"{validation.validate_print_ip_address(client_ip_address)}:"
-                               f"{client_port}")
+                           f"{validation.validate_print_ip_address(client_ip_address)}:"
+                           f"{client_port}")
 
                 # Remove sent bytes from the send buffer
                 data.send_buffer = data.send_buffer[sent:]
