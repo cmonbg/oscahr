@@ -285,7 +285,7 @@ class Proxy:
                         self._log.debug("Activating remote access for device " + device_info[0])
                         self._add_device_automatically(*device_info, "orbot")
 
-                        data.send_buffer = self._registered_devices[device_info[0]["onion_address"]]
+                        data.send_buffer = self._registered_devices[device_info[0]]["onion_address"]
 
                     except Exception as error:
                         data.send_buffer = constant.ERROR_RESPONSE
@@ -374,7 +374,7 @@ class Proxy:
         self._log.info("Finished adding new smart home device...")
 
         # Add the new device to the dictionary and write to JSON file
-        self._registered_devices.update({device_name: new_device[device_name]})
+        self._registered_devices.update(new_device)
         self._set_registered_devices()
 
     def _add_device_manually(self):
