@@ -275,6 +275,7 @@ class Proxy:
             elif ipaddress.ip_address(client_ip_address) != ipaddress.IPv4Address("127.0.0.1"):
                 # Remote access activation
 
+                command = command.split("\\")
                 self._log.debug(type(command))
                 self._log.debug(command)
                 self._log.debug(constant.LOCAL_COMMANDS[2])
@@ -339,6 +340,7 @@ class Proxy:
         if mask & selectors.EVENT_WRITE:
             if data.send_buffer:
                 sent = sock.send(data.send_buffer.encode())
+                self._log.debug(data.send_buffer)
                 self._log.info(f"Sent '{data.send_buffer[:sent]}' to client "
                                f"{validation.validate_print_ip_address(client_ip_address)}:"
                                f"{client_port}")
