@@ -259,6 +259,8 @@ class Proxy:
             command, _, parameter = data.receive_buffer.partition(constant.DELIMITER_PARAM)
             self._log.info(f"Processing command '{command}' with parameter '{parameter}'")
 
+            command = command.split("\\")[1]
+
             data.receive_buffer = ""  # Reset buffer
             data.timer = None  # Reset timer
 
@@ -275,7 +277,7 @@ class Proxy:
             elif ipaddress.ip_address(client_ip_address) != ipaddress.IPv4Address("127.0.0.1"):
                 # Remote access activation
 
-                if str(command) == constant.LOCAL_COMMANDS[2]:
+                if command == constant.LOCAL_COMMANDS[2]:
                     try:
                         device_info = parameter.split(constant.DELIMITER_PARAM)
                         self._log.debug("Activating remote access for device " + device_info[0])
