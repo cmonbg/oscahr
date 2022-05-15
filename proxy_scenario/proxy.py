@@ -289,7 +289,7 @@ class Proxy:
 
                     except Exception as error:
                         data.send_buffer = constant.ERROR_RESPONSE
-                        self._log.error(f"Error while creating Tor Onion Service: {error}")
+                        self._log.error(f"Error while creating Tor Onion Service: {error} at {traceback.print_exc()}")
 
                 # TODO
                 # Remote access deactivation
@@ -315,8 +315,7 @@ class Proxy:
                         data.send_buffer = constant.SUCCESS_RESPONSE
                     except Exception as error:
                         data.send_buffer = constant.ERROR_RESPONSE
-                        self._log.debug("wtf is going SDFSDFSDFSDFon")
-                        self._log.error(f"Error while removing Tor Onion Service: {error} at " + traceback.print_exc())
+                        self._log.error(f"Error while removing Tor Onion Service: {error}")
 
             # Unknown command (empty send buffer and not exit command)
             if data.send_buffer == "" and command != constant.LOCAL_COMMANDS[5]:
