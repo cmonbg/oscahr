@@ -374,7 +374,7 @@ class Proxy:
         self._log.info("Finished adding new smart home device...")
 
         # Add the new device to the dictionary and write to JSON file
-        self._registered_devices.update(new_device)
+        self._registered_devices.update({device_name: new_device[device_name]})
         self._set_registered_devices()
 
     def _add_device_manually(self):
