@@ -260,7 +260,7 @@ class Proxy:
 
             # for some strange reason there is a singular '\' or '[' in the beginning, removen
             # it
-            command = command[1:]
+            command = command[5:]
 
             self._log.info(f"Processing command '{command}' with parameter '{parameter}'")
 
