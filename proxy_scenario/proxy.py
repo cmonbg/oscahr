@@ -315,6 +315,7 @@ class Proxy:
                         data.send_buffer = constant.SUCCESS_RESPONSE
                     except Exception as error:
                         data.send_buffer = constant.ERROR_RESPONSE
+                        self._log.debug("wtf is going on")
                         self._log.error(f"Error while removing Tor Onion Service: {error} at " + traceback.print_exc())
 
             # Unknown command (empty send buffer and not exit command)
