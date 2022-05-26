@@ -258,8 +258,9 @@ class Proxy:
             # there is none partition returns an empty string
             command, _, parameter = data.receive_buffer.partition(constant.DELIMITER_PARAM)
 
-            # for some strange reason there is a singular '\' or '[' in the beginning, removen
-            # it
+            # for some strange reason there is a singular '\' or '[' in the beginning, remove it
+            # this probably stems from the used java socket send method, but further testing would be needed to
+            # determine the exact cause
             command = command[2:]
 
             self._log.info(f"Processing command '{command}' with parameter '{parameter}'")
